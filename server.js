@@ -9,13 +9,22 @@ const handle = app.getRequestHandler()
 app.prepare().then(() => {
   const server = express()
 
-  server.get('/a', (req, res) => {
-    return app.render(req, res, '/a', req.query)
-  })
-
-  server.get('/b', (req, res) => {
-    return app.render(req, res, '/b', req.query)
-  })
+  server.get('/api/messages/welcome', (req, res) =>
+    res.json({
+      messages: [
+        {
+          id: 'welcome-1',
+          message: 'Olá, meu nome é Ludilene',
+          isUser: false,
+        },
+        {
+          id: 'welcome-2',
+          message: 'Está querendo visitar algum lugar? Me diga onde e eu irei te auxiliar, posso te ajudar no planejamento de sua viajem!',
+          isUser: false,
+        },
+      ],
+    })
+  )
 
   server.all('*', (req, res) => {
     return handle(req, res)
