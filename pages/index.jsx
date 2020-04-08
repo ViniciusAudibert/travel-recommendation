@@ -2,12 +2,36 @@ import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Chat } from '../src/components/Chat'
 
+import { v4 as uuidv4 } from 'uuid'
+import AssistantV2 from 'ibm-watson/assistant/v2'
+import { IamAuthenticator } from 'ibm-watson/auth'
+
 const Index = ({ welcomeMessages }) => {
   const [messages, setMessages] = useState(welcomeMessages)
 
   useEffect(() => {
-    console.log('asdsad')
-  }, [messages])
+    console.log('started')
+    if (typeof window !== 'undefined') {
+      const assistant = new AssistantV2({
+        version: 'Development',
+        authenticator: new IamAuthenticator({
+          apikey: 'YE4AnSiMZOV5j4oJcpjSaLQhX93sftXcutxC9bTJUFIx',
+        }),
+        url: 'https://api.au-syd.assistant.watson.cloud.ibm.com/instances/b99ae937-3073-4c9d-b94d-17719d96d666',
+      })
+
+      assistant
+        .createSession({
+          assistantId: uuidv4(),
+        })
+        .then((res) => {
+          console.log(JSON.stringify(res.result, null, 2))
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+    }
+  }, [])
 
   function onEnter(message) {
     messages.push({
