@@ -13,11 +13,11 @@ const Index = ({ welcomeMessages }) => {
     console.log('started')
     if (typeof window !== 'undefined') {
       const assistant = new AssistantV2({
-        version: 'Development',
+        version: '2019-04-07',
         authenticator: new IamAuthenticator({
           apikey: 'YE4AnSiMZOV5j4oJcpjSaLQhX93sftXcutxC9bTJUFIx',
         }),
-        url: 'https://api.au-syd.assistant.watson.cloud.ibm.com/instances/b99ae937-3073-4c9d-b94d-17719d96d666',
+        url: 'https://gateway.watsonplatform.net/assistant/api',
       })
 
       assistant
