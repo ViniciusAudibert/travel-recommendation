@@ -2,15 +2,16 @@ import './style.scss'
 import React, { useState, useEffect, useRef } from 'react'
 import { Form, Button, FormControl } from 'react-bootstrap'
 import { ChatIcon } from './icon'
+import { ChatMessageByType } from './partials/message-by-type'
 
-export const Chat = props => {
+export const Chat = (props) => {
   const { onEnter, messages } = props
   const [value, setValue] = useState('')
   const messagesRef = useRef(null)
 
-  useEffect(() => {
-    messagesRef.current.scrollTo(0, messagesRef.current.scrollHeight)
-  }, [messages.length])
+    useEffect(() => {
+      messagesRef.current.scrollTo(0, messagesRef.current.scrollHeight)
+    }, [messages.length])
 
   function handleSubmit(e) {
     e.preventDefault()
@@ -40,7 +41,9 @@ export const Chat = props => {
                   <ChatIcon isUser={false} />
                 </>
               )}
-              <p className="text">{q.message}</p>
+              <div className="text">
+                <ChatMessageByType {...q} />
+              </div>
               {isLastUserMessage && <ChatIcon isUser={true} />}
             </div>
           )
@@ -48,7 +51,7 @@ export const Chat = props => {
       </div>
 
       <Form className="form" onSubmit={handleSubmit}>
-        <FormControl placeholder="Digite aqui..." value={value} onChange={e => setValue(e.target.value)} />
+        <FormControl placeholder="Digite aqui..." value={value} onChange={(e) => setValue(e.target.value)} autoFocus />
         <Button className="button" type="submit">
           Submit
         </Button>

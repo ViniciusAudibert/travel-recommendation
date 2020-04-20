@@ -1,47 +1,104 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import axios from 'axios'
 import { Chat } from '../src/components/Chat'
+import { v4 } from 'uuid'
+import { MESSAGE_TYPE } from '../src/variables/message'
 
-import { v4 as uuidv4 } from 'uuid'
-import AssistantV2 from 'ibm-watson/assistant/v2'
-import { IamAuthenticator } from 'ibm-watson/auth'
+const USER_ID = v4()
 
 const Index = ({ welcomeMessages }) => {
-  const [messages, setMessages] = useState(welcomeMessages)
+  const [messages, setMessages] = useState(
+    welcomeMessages.texts.map((m, i) => ({
+      id: 'ludmila-message-' + i,
+      message: m,
+      type: MESSAGE_TYPE.MESSAGE,
+      isUser: false,
+    }))
+  )
 
   useEffect(() => {
-    console.log('started')
-    if (typeof window !== 'undefined') {
-      const assistant = new AssistantV2({
-        version: '2019-04-07',
-        authenticator: new IamAuthenticator({
-          apikey: 'YE4AnSiMZOV5j4oJcpjSaLQhX93sftXcutxC9bTJUFIx',
-        }),
-        url: 'https://gateway.watsonplatform.net/assistant/api',
+    async function askLudilene(message) {
+      const resp = await axios.get('http://localhost:3000/api/messages/talk', { params: { message, customer_id: USER_ID } })
+      setMessages((m) => {
+        const { endereco, googleUrl, images, reviews, texts, title, descricao } = resp.data
+
+        if (title) {
+          m.push({
+            id: 'ludmila-message-' + m.length,
+            type: MESSAGE_TYPE.TITLE,
+            message: title,
+            isUser: false,
+          })
+        }
+
+        if (descricao) {
+          m.push({
+            id: 'ludmila-message-' + m.length,
+            type: MESSAGE_TYPE.MESSAGE,
+            message: descricao,
+            isUser: false,
+          })
+        }
+
+        if (images && images.length) {
+          m.push({
+            id: 'ludmila-message-' + m.length,
+            type: MESSAGE_TYPE.IMAGE,
+            message: images,
+            isUser: false,
+          })
+        }
+        if (googleUrl || endereco) {
+          m.push({
+            id: 'ludmila-message-' + m.length,
+            type: MESSAGE_TYPE.GOOGLE_LINK,
+            message: endereco,
+            link: googleUrl,
+            isUser: false,
+          })
+        }
+
+        if (reviews && reviews.length) {
+          m.push({
+            id: 'ludmila-message-' + m.length,
+            type: MESSAGE_TYPE.REVIEW,
+            message: reviews,
+            isUser: false,
+          })
+        }
+
+        texts.forEach((r) => {
+          m.push({
+            id: 'ludmila-message-' + m.length,
+            message: r,
+            isUser: false,
+          })
+        })
+
+        return [...m]
       })
-
-      assistant
-        .createSession({
-          assistantId: uuidv4(),
-        })
-        .then((res) => {
-          console.log(JSON.stringify(res.result, null, 2))
-        })
-        .catch((err) => {
-          console.log(err)
-        })
     }
-  }, [])
 
-  function onEnter(message) {
-    messages.push({
-      id: 'user-message-' + messages.length,
-      message,
-      isUser: true,
-    })
+    const lastMessage = messages[messages.length - 1]
 
-    setMessages(messages)
-  }
+    if (lastMessage && lastMessage.isUser) {
+      askLudilene(lastMessage.message)
+    }
+  }, [messages, setMessages])
+
+  const onEnter = useCallback(
+    (message) => {
+      setMessages((m) => {
+        m.push({
+          id: 'user-message-' + m.length,
+          message,
+          isUser: true,
+        })
+        return [...m]
+      })
+    },
+    [setMessages]
+  )
 
   return (
     <div>
@@ -53,7 +110,7 @@ const Index = ({ welcomeMessages }) => {
 Index.getInitialProps = async () => {
   const { data } = await axios.get('http://localhost:3000/api/messages/welcome')
 
-  return { welcomeMessages: data.messages }
+  return { welcomeMessages: data }
 }
 
 export default Index

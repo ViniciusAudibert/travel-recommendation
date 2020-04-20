@@ -97,3 +97,80 @@ $padding: 20px;
     width: 100%;
   }
 }
+
+.chat-type-images {
+  > .text {
+    font-weight: bolder;
+  }
+
+  > .images {
+    display: flex;
+    flex-direction: column;
+
+    > .image {
+      display: block;
+      width: 100%;
+      margin: 5px 0;
+    }
+  }
+}
+
+.chat-type-title {
+  margin: 0;
+
+  > .highlight {
+    font-size: 16px;
+    font-weight: bolder;
+  }
+}
+
+.chat-type-address {
+  > .text {
+    font-weight: bolder;
+  }
+
+  > .images {
+    display: flex;
+
+    > .image {
+      display: block;
+      width: 500px;
+      margin-left: 10px;
+    }
+  }
+}
+
+.chat-type-review {
+  .review + .review {
+    border-top: 1px dashed #1d1d1d;
+    margin-top: 5px;
+    padding-top: 5px;
+  }
+
+  > .review {
+    > .info {
+      display: flex;
+      justify-content: space-between;
+
+      p {
+        font-size: 10px;
+      }
+    }
+  }
+
+  .review-message {
+    font-size: 10px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+  }
+
+  > .images {
+    display: flex;
+
+    > .image {
+      display: block;
+      width: 500px;
+      margin-left: 10px;
+    }
+  }
+}
