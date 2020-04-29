@@ -1,4 +1,5 @@
 import React from 'react'
+import { Carousel } from 'react-responsive-carousel'
 
 export const ChatImages = (props) => {
   return (
@@ -6,9 +7,13 @@ export const ChatImages = (props) => {
       <span className="text">Veja algumas imagens:</span>
 
       <div className="images">
-        {props.message.map((image, i) => (
-          <img className="image" src={image} key={i} />
-        ))}
+        <Carousel>
+          {props.message.map((image, i) => (
+            <div>
+              <img className="image" src={image} key={i} />
+            </div>
+          ))}
+        </Carousel>
       </div>
     </div>
   )

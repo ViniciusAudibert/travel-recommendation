@@ -28,6 +28,7 @@
     "react-dom": "^16.13.0",
     "react-google-maps": "^9.4.5",
     "react-notification-system": "0.2.17",
+    "react-responsive-carousel": "^3.2.5",
     "react-toggle": "4.0.2",
     "url-loader": "^4.0.0",
     "uuid": "^7.0.3"

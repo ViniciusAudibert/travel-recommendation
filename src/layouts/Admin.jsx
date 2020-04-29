@@ -1,3 +1,5 @@
+import 'react-responsive-carousel/lib/styles/carousel.min.css'
+
 import React, { Component } from 'react'
 import NotificationSystem from 'react-notification-system'
 
@@ -22,7 +24,7 @@ class Admin extends Component {
     }
   }
 
-  handleNotificationClick = position => {
+  handleNotificationClick = (position) => {
     var color = Math.floor(Math.random() * 4 + 1)
     var level
     switch (color) {
@@ -42,13 +44,13 @@ class Admin extends Component {
         break
     }
   }
-  getRoutes = routes => {
+  getRoutes = (routes) => {
     return routes.map((prop, key) => {
       if (prop.layout === '/admin') {
         return (
           <Route
             path={prop.layout + prop.path}
-            render={props => <prop.component {...props} handleClick={this.handleNotificationClick} />}
+            render={(props) => <prop.component {...props} handleClick={this.handleNotificationClick} />}
             key={key}
           />
         )
@@ -58,11 +60,11 @@ class Admin extends Component {
     })
   }
 
-  handleImageClick = image => {
+  handleImageClick = (image) => {
     this.setState({ image: image })
   }
 
-  handleHasImage = hasImage => {
+  handleHasImage = (hasImage) => {
     this.setState({ hasImage: hasImage })
   }
 
