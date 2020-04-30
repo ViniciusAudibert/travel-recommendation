@@ -19,6 +19,7 @@ const PONTOS_INTERESSE = {
 const ESTADOS_RESPOSTA = {
   GOSTA_DO_LUGAR: 0,
   CONHECER_OUTRO: 1,
+  GOSTA_DA_TAG: 2,
 }
 
 class RecommendationService {
@@ -33,7 +34,7 @@ class RecommendationService {
     if (!customerOption) {
       this.customers[customer_id] = {
         cidade: local,
-        estadoResposta: undefined,
+        estadoResposta: ESTADOS_RESPOSTA.GOSTA_DA_TAG,
         lastTag: undefined,
         excluirLocais: [],
         excluirTags: [],
@@ -93,11 +94,11 @@ class RecommendationService {
       } else if (gostou === false) {
         returnVal = await this._recomendarOutraTag(customerOption)
       }
-    } else {
+    } else if (customerOption.estadoResposta === ESTADOS_RESPOSTA.GOSTA_DA_TAG) {
       if (gostou === true) {
         returnVal = await this._recomendarLugar(customerOption)
       } else if (gostou === false) {
-        //customerOption.unliked.push(customerOption.lastTag)
+        returnVal = this._didNotLikeTheTag(customerOption)
       }
     }
 
@@ -105,6 +106,17 @@ class RecommendationService {
 
     mongoService.closeConnection()
     return returnVal
+  }
+
+  async _didNotLikeTheTag(customerOption) {
+    customerOption.excluirTags.push(customerOption.lastTag)
+    
+    await mongoService.openConnection()
+    await this._setNewLocalWithNewTag(customerOption)
+
+    mongoService.closeConnection()
+
+    return { texts: [`E que tal conhecer ${customerOption.lastTagDesc} em ${customerOption.cidade.nome}?`] }
   }
 
   async _setNewLocalWithNewTag(customerOption) {
@@ -126,7 +138,7 @@ class RecommendationService {
     customerOption.lastTagDesc = tipoLugar
     customerOption.lastTag = onePlace[0].tags[0]
     customerOption.lastPlace = onePlace[0]
-    customerOption.estadoResposta = undefined
+    customerOption.estadoResposta = ESTADOS_RESPOSTA.GOSTA_DA_TAG
   }
 
   async _recomendarLugar(customerOption) {

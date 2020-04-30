@@ -53,12 +53,20 @@ class MessageController {
   }
 
   async welcomeMessage(req, res) {
-    const customer_id = req.param('customer_id')
-    const response = await watsonService.welcome({ customer_id })
+    try {
+      const customer_id = req.param('customer_id')
+      const response = await watsonService.welcome({ customer_id })
 
-    return res.json({
-      texts: response.output.text,
-    })
+      return res.json({
+        texts: response.output.text,
+      })
+    } catch (ex) {
+      console.log(ex)
+
+      res.status(500).json({
+        message: 'Ocorreu um erro inesperado',
+      })
+    }
   }
 }
 
