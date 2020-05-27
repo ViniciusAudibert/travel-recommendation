@@ -1,3 +1,4 @@
+const { userService } = require('./user')
 const { mongoService } = require('./mongo')
 const { PATHS } = require('../constants/paths')
 
@@ -68,7 +69,7 @@ class RecommendationService {
 
     mongoService.closeConnection()
 
-    return { texts: messages }
+    return { messages }
   }
 
   async _getProximasRecomendacoes(customerOption, gostou) {
@@ -79,11 +80,12 @@ class RecommendationService {
     if (customerOption.estadoResposta === ESTADOS_RESPOSTA.GOSTA_DO_LUGAR) {
       customerOption.excluirLocais.push(customerOption.lastPlace._id)
       if (gostou === true) {
+        userService.addLocal(customerOption.lastPlace)
         customerOption.locaisCurtidos.push(customerOption.lastPlace)
         customerOption.estadoResposta = ESTADOS_RESPOSTA.CONHECER_OUTRO
 
         returnVal = {
-          texts: [`Quer mais dicas de ${customerOption.lastTagDesc} em ${customerOption.cidade.nome}?`],
+          messages: [`Quer mais dicas de ${customerOption.lastTagDesc} em ${customerOption.cidade.nome}?`],
         }
       } else if (gostou === false) {
         returnVal = await this._recomendarOutroMesmaTag(customerOption)
@@ -110,13 +112,13 @@ class RecommendationService {
 
   async _didNotLikeTheTag(customerOption) {
     customerOption.excluirTags.push(customerOption.lastTag)
-    
+
     await mongoService.openConnection()
     await this._setNewLocalWithNewTag(customerOption)
 
     mongoService.closeConnection()
 
-    return { texts: [`E que tal conhecer ${customerOption.lastTagDesc} em ${customerOption.cidade.nome}?`] }
+    return { messages: [`E que tal conhecer ${customerOption.lastTagDesc} em ${customerOption.cidade.nome}?`] }
   }
 
   async _setNewLocalWithNewTag(customerOption) {
@@ -129,9 +131,9 @@ class RecommendationService {
       lugaresOptions._id = { $nin: customerOption.excluirLocais }
     }
 
-    const lugaresDb = await mongoService.db.collection('lugar').find(lugaresOptions)
+    const lugaresDb = await mongoService.db.collection('lugar').aggregate([{ $match: lugaresOptions }, ...this._getSortingLugarAggregate()])
 
-    const onePlace = await lugaresDb.limit(1).toArray()
+    const onePlace = await lugaresDb.toArray()
 
     const tipoLugar = PONTOS_INTERESSE[onePlace[0].tags[0]]
 
@@ -157,18 +159,25 @@ class RecommendationService {
       images,
       reviews: customerOption.lastPlace.reviews,
       descricao: `${customerOption.lastPlace.descricao} Localizado em ${customerOption.cidade.nome}`,
-      texts: [`Quer adicionar esse local a sua lista de lugares para visitar em ${customerOption.cidade.nome}?`],
+      messages: [`Quer adicionar esse local a sua lista de lugares para visitar em ${customerOption.cidade.nome}?`],
     }
 
     return returnObj
   }
 
   async _recomendarOutroMesmaTag(customerOption) {
-    const lugaresDb = await mongoService.db
-      .collection('lugar')
-      .find({ cidadeId: customerOption.cidade._id, _id: { $nin: customerOption.excluirLocais }, tags: { $in: [customerOption.lastTag] } })
+    const lugaresDb = await mongoService.db.collection('lugar').aggregate([
+      {
+        $match: {
+          cidadeId: customerOption.cidade._id,
+          _id: { $nin: customerOption.excluirLocais },
+          tags: { $in: [customerOption.lastTag] },
+        },
+      },
+      ...this._getSortingLugarAggregate(),
+    ])
 
-    const placeDb = await lugaresDb.limit(1).toArray()
+    const placeDb = await lugaresDb.toArray()
     customerOption.lastPlace = placeDb[0]
     return this._recomendarLugar(customerOption)
   }
@@ -178,16 +187,44 @@ class RecommendationService {
 
     await this._setNewLocalWithNewTag(customerOption)
     return {
-      texts: [`Gostaria de conhecer ${customerOption.lastTagDesc} em ${customerOption.cidade.nome}?`],
+      messages: [`Gostaria de conhecer ${customerOption.lastTagDesc} em ${customerOption.cidade.nome}?`],
     }
   }
 
   _naoEntendiSeGostou() {
-    return { texts: ['Não entendi se gostou ou não'] }
+    return { messages: ['Não entendi se gostou ou não'] }
   }
 
   _getImageUrl(imageId) {
     return PATHS.CONTROLLER.IMAGE_GOOGLE_ID + '?id=' + imageId
+  }
+
+  _getSortingLugarAggregate() {
+    return [
+      {
+        $addFields: {
+          reviews_size: {
+            $cond: {
+              if: {
+                $isArray: '$reviews',
+              },
+              then: {
+                $size: '$reviews',
+              },
+              else: 0,
+            },
+          },
+        },
+      },
+      {
+        $sort: {
+          reviews_size: -1,
+        },
+      },
+      {
+        $limit: 1,
+      },
+    ]
   }
 }
 

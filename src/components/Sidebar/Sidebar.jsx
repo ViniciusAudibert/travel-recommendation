@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import Link from 'next/link'
 import AdminNavbarLinks from '../Navbars/AdminNavbarLinks.jsx'
 
-const Sidebar = props => {
+const Sidebar = (props) => {
   const router = useRouter()
   const [width, setWidth] = useState(1080)
 
@@ -17,7 +17,7 @@ const Sidebar = props => {
   }, [setWidth])
 
   function activeRoute(routeName) {
-    return router.pathname.indexOf(routeName) > -1 ? 'active' : ''
+    return router.pathname === routeName ? 'active' : ''
   }
 
   function updateDimensions() {

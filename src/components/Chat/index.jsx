@@ -8,10 +8,15 @@ export const Chat = (props) => {
   const { onEnter, messages } = props
   const [value, setValue] = useState('')
   const messagesRef = useRef(null)
+  const inputRef = useRef(null)
 
-    useEffect(() => {
-      messagesRef.current.scrollTo(0, messagesRef.current.scrollHeight)
-    }, [messages.length])
+  useEffect(() => {
+    inputRef.current._reactInternalFiber.child.stateNode.focus()
+  }, [])
+
+  useEffect(() => {
+    messagesRef.current.scrollTo(0, messagesRef.current.scrollHeight)
+  }, [messages.length])
 
   function handleSubmit(e) {
     e.preventDefault()
@@ -51,9 +56,9 @@ export const Chat = (props) => {
       </div>
 
       <Form className="form" onSubmit={handleSubmit}>
-        <FormControl placeholder="Digite aqui..." value={value} onChange={(e) => setValue(e.target.value)} autoFocus />
+        <FormControl ref={inputRef} placeholder="Digite aqui..." value={value} onChange={(e) => setValue(e.target.value)} />
         <Button className="button" type="submit">
-          Submit
+          Enviar
         </Button>
       </Form>
     </div>

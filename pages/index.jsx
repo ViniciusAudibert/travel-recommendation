@@ -1,82 +1,39 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import axios from 'axios'
 import { Chat } from '../src/components/Chat'
+import { MessageUtil } from '../src/mappers/message'
 import { v4 } from 'uuid'
-import { MESSAGE_TYPE } from '../src/variables/message'
 
-const USER_ID = v4()
+const Index = () => {
+  const [messages, setMessages] = useState([])
 
-const Index = ({ welcomeMessages }) => {
-  const [messages, setMessages] = useState(
-    welcomeMessages.texts.map((m, i) => ({
-      id: 'ludmila-message-' + i,
-      message: m,
-      type: MESSAGE_TYPE.MESSAGE,
-      isUser: false,
-    }))
-  )
+  const userId = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      let id = localStorage.getItem('USER_ID')
+
+      if (!id) {
+        id = `${Date.now()}--${v4()}`
+        localStorage.setItem('USER_ID', id)
+      }
+
+      return id
+    }
+  }, [])
+
+  useEffect(() => {
+    const welcomeFetch = async () => {
+      const { data } = await axios.get('/api/messages/welcome', { params: { customer_id: userId } })
+      const mappedMessages = data.messages.map((m) => MessageUtil.serverDataToChatMessage(m))
+      setMessages(mappedMessages.flat())
+    }
+
+    welcomeFetch()
+  }, [])
 
   useEffect(() => {
     async function askLudilene(message) {
-      const resp = await axios.get('http://localhost:3000/api/messages/talk', { params: { message, customer_id: USER_ID } })
-      setMessages((m) => {
-        const { endereco, googleUrl, images, reviews, texts, title, descricao } = resp.data
-
-        if (title) {
-          m.push({
-            id: 'ludmila-message-' + m.length,
-            type: MESSAGE_TYPE.TITLE,
-            message: title,
-            isUser: false,
-          })
-        }
-
-        if (descricao) {
-          m.push({
-            id: 'ludmila-message-' + m.length,
-            type: MESSAGE_TYPE.MESSAGE,
-            message: descricao,
-            isUser: false,
-          })
-        }
-
-        if (images && images.length) {
-          m.push({
-            id: 'ludmila-message-' + m.length,
-            type: MESSAGE_TYPE.IMAGE,
-            message: images,
-            isUser: false,
-          })
-        }
-        if (googleUrl || endereco) {
-          m.push({
-            id: 'ludmila-message-' + m.length,
-            type: MESSAGE_TYPE.GOOGLE_LINK,
-            message: endereco,
-            link: googleUrl,
-            isUser: false,
-          })
-        }
-
-        if (reviews && reviews.length) {
-          m.push({
-            id: 'ludmila-message-' + m.length,
-            type: MESSAGE_TYPE.REVIEW,
-            message: reviews,
-            isUser: false,
-          })
-        }
-
-        texts.forEach((r) => {
-          m.push({
-            id: 'ludmila-message-' + m.length,
-            message: r,
-            isUser: false,
-          })
-        })
-
-        return [...m]
-      })
+      const resp = await axios.get('/api/messages/talk', { params: { message, customer_id: userId } })
+      setMessages((m) => m.concat(MessageUtil.serverDataToChatMessage(resp.data)))
     }
 
     const lastMessage = messages[messages.length - 1]
@@ -105,12 +62,6 @@ const Index = ({ welcomeMessages }) => {
       <Chat messages={messages} onEnter={onEnter} />
     </div>
   )
-}
-
-Index.getInitialProps = async () => {
-  const { data } = await axios.get('http://localhost:3000/api/messages/welcome')
-
-  return { welcomeMessages: data }
 }
 
 export default Index

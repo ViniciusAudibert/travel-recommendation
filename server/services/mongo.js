@@ -22,25 +22,27 @@ class MongoService {
           useUnifiedTopology: true,
         },
         (err, client) => {
-          if (err) reject(err)
+          if (err) {
+            reject(err)
+          } else {
+            const dbName = 'travel-recommendation'
+            const db = client.db(dbName)
 
-          const dbName = 'travel-recommendation'
-          const db = client.db(dbName)
+            this.client = client
+            this.db = db
 
-          this.client = client
-          this.db = db
-
-          console.log('Conection created!')
-          resolve()
+            console.log('Conection created!')
+            resolve()
+          }
         }
       )
     })
   }
 
-  closeConnection() {
+  async closeConnection() {
     console.log('Conection close')
 
-    if (this.client) this.client.close()
+    if (this.client) await this.client.close()
   }
 }
 
