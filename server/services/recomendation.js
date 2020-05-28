@@ -18,52 +18,40 @@ const PONTOS_INTERESSE = {
 }
 
 const ESTADOS_RESPOSTA = {
-  GOSTA_DO_LUGAR: 0,
-  CONHECER_OUTRO: 1,
-  GOSTA_DA_TAG: 2,
+  GOSTA_DO_LUGAR: 'GOSTA_DO_LUGAR',
+  CONHECER_OUTRO: 'CONHECER_OUTRO',
+  GOSTA_DA_TAG: 'GOSTA_DA_TAG',
 }
 
 class RecommendationService {
-  constructor() {
-    this.customers = {}
-  }
-
-  async recommend({ local, gostou, customer_id }) {
+  async recommend({ user, gostou }) {
     let messages = []
-    const customerOption = this.customers[customer_id]
+    const { estadoResposta } = user
 
-    if (!customerOption) {
-      this.customers[customer_id] = {
-        cidade: local,
-        estadoResposta: ESTADOS_RESPOSTA.GOSTA_DA_TAG,
-        lastTag: undefined,
-        excluirLocais: [],
-        excluirTags: [],
-        liked: [],
-        locaisCurtidos: [],
-      }
-
-      messages = await this._getPrimeiraRecomendacao(local, this.customers[customer_id])
+    if (estadoResposta) {
+      messages = await this._getProximasRecomendacoes(user, gostou)
     } else {
-      messages = await this._getProximasRecomendacoes(customerOption, gostou)
+      messages = await this._getPrimeiraRecomendacao(user)
     }
 
     return messages
   }
 
-  async _getPrimeiraRecomendacao(local, customerOption) {
+  async _getPrimeiraRecomendacao(user) {
     let messages = []
     await mongoService.openConnection()
 
-    const cidadeDb = await mongoService.db.collection('cidade').findOne({ nome: local.toLowerCase() })
+    const cidadeDb = await mongoService.db.collection('cidade').findOne({ nome: user.cidade.toLowerCase() })
 
     if (cidadeDb) {
-      customerOption.cidade = cidadeDb
+      user.cidade = cidadeDb
 
-      await this._setNewLocalWithNewTag(customerOption)
+      await this._setNewLocalWithNewTag(user)
 
-      messages = [`Gostaria de conhecer ${customerOption.lastTagDesc} em ${customerOption.cidade.nome}?`]
+      user.estadoResposta = ESTADOS_RESPOSTA.GOSTA_DA_TAG
+      messages = [`Gostaria de conhecer ${user.lastTagDesc} em ${user.cidade.nome}?`]
     } else {
+      user.local = null
       messages = ['Não conheço esse lugar']
     }
 
@@ -72,35 +60,34 @@ class RecommendationService {
     return { messages }
   }
 
-  async _getProximasRecomendacoes(customerOption, gostou) {
+  async _getProximasRecomendacoes(user, gostou) {
     let returnVal
 
     await mongoService.openConnection()
 
-    if (customerOption.estadoResposta === ESTADOS_RESPOSTA.GOSTA_DO_LUGAR) {
-      customerOption.excluirLocais.push(customerOption.lastPlace._id)
+    if (user.estadoResposta === ESTADOS_RESPOSTA.GOSTA_DO_LUGAR) {
+      user.excluirLocais.push(user.lastPlace._id)
       if (gostou === true) {
-        userService.addLocal(customerOption.lastPlace)
-        customerOption.locaisCurtidos.push(customerOption.lastPlace)
-        customerOption.estadoResposta = ESTADOS_RESPOSTA.CONHECER_OUTRO
+        user.locaisCurtidos.push(user.lastPlace)
+        user.estadoResposta = ESTADOS_RESPOSTA.CONHECER_OUTRO
 
         returnVal = {
-          messages: [`Quer mais dicas de ${customerOption.lastTagDesc} em ${customerOption.cidade.nome}?`],
+          messages: [`Quer mais dicas de ${user.lastTagDesc} em ${user.cidade.nome}?`],
         }
       } else if (gostou === false) {
-        returnVal = await this._recomendarOutroMesmaTag(customerOption)
+        returnVal = await this._recomendarOutroMesmaTag(user)
       }
-    } else if (customerOption.estadoResposta === ESTADOS_RESPOSTA.CONHECER_OUTRO) {
+    } else if (user.estadoResposta === ESTADOS_RESPOSTA.CONHECER_OUTRO) {
       if (gostou === true) {
-        returnVal = await this._recomendarOutroMesmaTag(customerOption)
+        returnVal = await this._recomendarOutroMesmaTag(user)
       } else if (gostou === false) {
-        returnVal = await this._recomendarOutraTag(customerOption)
+        returnVal = await this._recomendarOutraTag(user)
       }
-    } else if (customerOption.estadoResposta === ESTADOS_RESPOSTA.GOSTA_DA_TAG) {
+    } else if (user.estadoResposta === ESTADOS_RESPOSTA.GOSTA_DA_TAG) {
       if (gostou === true) {
-        returnVal = await this._recomendarLugar(customerOption)
+        returnVal = await this._recomendarLugar(user)
       } else if (gostou === false) {
-        returnVal = this._didNotLikeTheTag(customerOption)
+        returnVal = this._didNotLikeTheTag(user)
       }
     }
 
@@ -110,25 +97,25 @@ class RecommendationService {
     return returnVal
   }
 
-  async _didNotLikeTheTag(customerOption) {
-    customerOption.excluirTags.push(customerOption.lastTag)
+  async _didNotLikeTheTag(user) {
+    user.excluirTags.push(user.lastTag)
 
     await mongoService.openConnection()
-    await this._setNewLocalWithNewTag(customerOption)
+    await this._setNewLocalWithNewTag(user)
 
     mongoService.closeConnection()
 
-    return { messages: [`E que tal conhecer ${customerOption.lastTagDesc} em ${customerOption.cidade.nome}?`] }
+    return { messages: [`E que tal conhecer ${user.lastTagDesc} em ${user.cidade.nome}?`] }
   }
 
-  async _setNewLocalWithNewTag(customerOption) {
-    const lugaresOptions = { cidadeId: customerOption.cidade._id }
-    if (customerOption.excluirTags.length) {
-      lugaresOptions.tags = { $nin: customerOption.excluirTags }
+  async _setNewLocalWithNewTag(user) {
+    const lugaresOptions = { cidadeId: user.cidade._id }
+    if (user.excluirTags.length) {
+      lugaresOptions.tags = { $nin: user.excluirTags }
     }
 
-    if (customerOption.excluirLocais.length) {
-      lugaresOptions._id = { $nin: customerOption.excluirLocais }
+    if (user.excluirLocais.length) {
+      lugaresOptions._id = { $nin: user.excluirLocais }
     }
 
     const lugaresDb = await mongoService.db.collection('lugar').aggregate([{ $match: lugaresOptions }, ...this._getSortingLugarAggregate()])
@@ -137,57 +124,57 @@ class RecommendationService {
 
     const tipoLugar = PONTOS_INTERESSE[onePlace[0].tags[0]]
 
-    customerOption.lastTagDesc = tipoLugar
-    customerOption.lastTag = onePlace[0].tags[0]
-    customerOption.lastPlace = onePlace[0]
-    customerOption.estadoResposta = ESTADOS_RESPOSTA.GOSTA_DA_TAG
+    user.lastTagDesc = tipoLugar
+    user.lastTag = onePlace[0].tags[0]
+    user.lastPlace = onePlace[0]
+    user.estadoResposta = ESTADOS_RESPOSTA.GOSTA_DA_TAG
   }
 
-  async _recomendarLugar(customerOption) {
-    customerOption.liked.push(customerOption.lastTag)
-    customerOption.estadoResposta = ESTADOS_RESPOSTA.GOSTA_DO_LUGAR
+  async _recomendarLugar(user) {
+    user.liked.push(user.lastTag)
+    user.estadoResposta = ESTADOS_RESPOSTA.GOSTA_DO_LUGAR
 
     let images = []
-    if (customerOption.lastPlace.images.length) {
-      images = customerOption.lastPlace.images.map((i) => this._getImageUrl(i))
+    if (user.lastPlace.images.length) {
+      images = user.lastPlace.images.map((i) => this._getImageUrl(i))
     }
 
     const returnObj = {
-      title: customerOption.lastPlace.nome,
-      endereco: customerOption.lastPlace.endereco,
-      googleUrl: customerOption.lastPlace.googleUrl,
+      title: user.lastPlace.nome,
+      endereco: user.lastPlace.endereco,
+      googleUrl: user.lastPlace.googleUrl,
       images,
-      reviews: customerOption.lastPlace.reviews,
-      descricao: `${customerOption.lastPlace.descricao} Localizado em ${customerOption.cidade.nome}`,
-      messages: [`Quer adicionar esse local a sua lista de lugares para visitar em ${customerOption.cidade.nome}?`],
+      reviews: user.lastPlace.reviews,
+      descricao: `${user.lastPlace.descricao} Localizado em ${user.cidade.nome}`,
+      messages: [`Quer adicionar esse local a sua lista de lugares para visitar em ${user.cidade.nome}?`],
     }
 
     return returnObj
   }
 
-  async _recomendarOutroMesmaTag(customerOption) {
+  async _recomendarOutroMesmaTag(user) {
     const lugaresDb = await mongoService.db.collection('lugar').aggregate([
       {
         $match: {
-          cidadeId: customerOption.cidade._id,
-          _id: { $nin: customerOption.excluirLocais },
-          tags: { $in: [customerOption.lastTag] },
+          cidadeId: user.cidade._id,
+          _id: { $nin: user.excluirLocais },
+          tags: { $in: [user.lastTag] },
         },
       },
       ...this._getSortingLugarAggregate(),
     ])
 
     const placeDb = await lugaresDb.toArray()
-    customerOption.lastPlace = placeDb[0]
-    return this._recomendarLugar(customerOption)
+    user.lastPlace = placeDb[0]
+    return this._recomendarLugar(user)
   }
 
-  async _recomendarOutraTag(customerOption) {
-    customerOption.excluirTags.push(customerOption.lastTag)
+  async _recomendarOutraTag(user) {
+    user.excluirTags.push(user.lastTag)
 
-    await this._setNewLocalWithNewTag(customerOption)
+    await this._setNewLocalWithNewTag(user)
     return {
-      messages: [`Gostaria de conhecer ${customerOption.lastTagDesc} em ${customerOption.cidade.nome}?`],
+      messages: [`Gostaria de conhecer ${user.lastTagDesc} em ${user.cidade.nome}?`],
     }
   }
 

@@ -43,19 +43,19 @@ class MessageController {
         const gostou = intentAfirmativo ? true : intentNegativo ? false : undefined
         const userCached = this.cacheUser[customer_id]
 
-        if (!userCached.where && localEntity) {
-          userCached.where = localEntity.value.toLowerCase()
-          userService.update(customer_id, { where: userCached.where })
+        if (!userCached.cidade && localEntity) {
+          userCached.cidade = localEntity.value.toLowerCase()
         }
-        
-        if (userCached.where) {
-          const recomendations = await recommendationService.recommend({ local: userCached.where, customer_id, gostou })
+
+        if (userCached.cidade) {
+          const recomendations = await recommendationService.recommend({ user: userCached, gostou })
 
           const chatMessage = {
             isUser: false,
             ...recomendations,
           }
           await chatService.add(customer_id, chatMessage)
+          await userService.update(userCached.idUser, userCached)
 
           return res.json(chatMessage)
         } else {
@@ -93,13 +93,13 @@ class MessageController {
       }
 
       const dbUser = await userService.get(customer_id)
+
       let chatMessages
       if (dbUser) {
         this.cacheUser[customer_id] = dbUser
         chatMessages = await chatService.get(customer_id)
       } else {
-        this.cacheUser[customer_id] = {}
-        await userService.add(customer_id)
+        this.cacheUser[customer_id] = await userService.add(customer_id)
         const response = await watsonService.welcome({ customer_id })
         const chatMessage = {
           messages: response.output.text,

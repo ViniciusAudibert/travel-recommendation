@@ -4,11 +4,21 @@ class UserService {
   async add(idUser) {
     await mongoService.openConnection()
 
-    await mongoService.db.collection('user').insertOne({
+    const user = {
       idUser,
-    })
+      cidade: null,
+      estadoResposta: null,
+      lastTag: null,
+      excluirLocais: [],
+      excluirTags: [],
+      liked: [],
+      locaisCurtidos: [],
+    }
 
+    await mongoService.db.collection('user').insertOne(user)
     await mongoService.closeConnection()
+
+    return user
   }
 
   async update(idUser, data) {
@@ -18,7 +28,7 @@ class UserService {
       {
         idUser,
       },
-      data
+      { $set: data }
     )
 
     await mongoService.closeConnection()
