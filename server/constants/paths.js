@@ -6,6 +6,7 @@ module.exports.PATHS = {
     MAIN_FOLDER: path.resolve(ROOT, 'controllers'),
     WELCOME: '/api/messages/welcome',
     TALK: '/api/messages/talk',
+    PLANEJAMENTOS: '/api/planejamentos',
     IMAGE_GOOGLE_ID: '/api/image/googleId',
   },
 }

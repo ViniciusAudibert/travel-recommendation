@@ -1,12 +1,13 @@
 const { mongoService } = require('./mongo')
 
 class PlanejamentosService {
-  async add(idUser, placeData) {
+  async add(idUser, user) {
     await mongoService.openConnection()
 
     await mongoService.db.collection('planejamentos').insertOne({
       idUser,
-      ...placeData,
+      nomeCidade: user.cidade.nome,
+      lugar: user.lastPlace,
     })
 
     await mongoService.closeConnection()
@@ -23,7 +24,20 @@ class PlanejamentosService {
 
     await mongoService.closeConnection()
 
-    return placesArr
+    return placesArr.reduce((curr, next) => {
+      const index = curr.findIndex((i) => i.nomeCidade === next.nomeCidade)
+
+      if (index != null) {
+        curr.push({
+          nomeCidade: next.nomeCidade,
+          lugares: [next.lugar],
+        })
+      } else {
+        curr[index].lugares.push(next.lugar)
+      }
+
+      return curr
+    }, [])
   }
 }
 

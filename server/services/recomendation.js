@@ -1,4 +1,4 @@
-const { userService } = require('./user')
+const { planejamentosService } = require('./planejamentos')
 const { mongoService } = require('./mongo')
 const { PATHS } = require('../constants/paths')
 
@@ -69,6 +69,9 @@ class RecommendationService {
       user.excluirLocais.push(user.lastPlace._id)
       if (gostou === true) {
         user.locaisCurtidos.push(user.lastPlace)
+
+        await planejamentosService.add(user.idUser, user)
+
         user.estadoResposta = ESTADOS_RESPOSTA.CONHECER_OUTRO
 
         returnVal = {

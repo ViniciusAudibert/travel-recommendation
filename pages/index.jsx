@@ -7,7 +7,7 @@ import { v4 } from 'uuid'
 const Index = () => {
   const [messages, setMessages] = useState([])
 
-  const userId = useMemo(() => {
+  const idUser = useMemo(() => {
     if (typeof window !== 'undefined') {
       let id = localStorage.getItem('USER_ID')
 
@@ -22,7 +22,7 @@ const Index = () => {
 
   useEffect(() => {
     const welcomeFetch = async () => {
-      const { data } = await axios.get('/api/messages/welcome', { params: { customer_id: userId } })
+      const { data } = await axios.get('/api/messages/welcome', { params: { customer_id: idUser } })
       const mappedMessages = data.messages.map((m) => MessageUtil.serverDataToChatMessage(m))
       setMessages(mappedMessages.flat())
     }
@@ -32,7 +32,7 @@ const Index = () => {
 
   useEffect(() => {
     async function askLudilene(message) {
-      const resp = await axios.get('/api/messages/talk', { params: { message, customer_id: userId } })
+      const resp = await axios.get('/api/messages/talk', { params: { message, customer_id: idUser } })
       setMessages((m) => m.concat(MessageUtil.serverDataToChatMessage(resp.data)))
     }
 

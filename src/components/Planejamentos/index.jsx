@@ -16,7 +16,7 @@ export const Planejamentos = ({ planejamentos }) => {
           <ListGroup>
             {planejamentos.length ? (
               planejamentos.map((planejamento) => {
-                const { _id, nome, lugares } = planejamento
+                const { _id, nomeCidade, lugares } = planejamento
 
                 return (
                   <>
@@ -31,7 +31,7 @@ export const Planejamentos = ({ planejamentos }) => {
                       }
                     >
                       <Badge>{lugares.length}</Badge>
-                      {nome}
+                      {nomeCidade}
                     </ListGroupItem>
 
                     {collapseLugares[_id] && (
