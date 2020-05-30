@@ -5,7 +5,7 @@ import { ChatIcon } from './icon'
 import { ChatMessageByType } from './partials/message-by-type'
 
 export const Chat = (props) => {
-  const { onEnter, messages } = props
+  const { onEnter, messages, loading } = props
   const [value, setValue] = useState('')
   const messagesRef = useRef(null)
   const inputRef = useRef(null)
@@ -27,35 +27,38 @@ export const Chat = (props) => {
 
   return (
     <div className="chat">
-      <div ref={messagesRef} className="messages">
-        {messages.map((q, i) => {
-          const previousMessage = messages[i - 1]
-          const nextMessage = messages[i + 1]
+      <div className="chat-container">
+        <div ref={messagesRef} className="messages">
+          {messages.map((q, i) => {
+            const previousMessage = messages[i - 1]
+            const nextMessage = messages[i + 1]
 
-          const isLastUserMessage = q.isUser && (i === messages.length - 1 || (!!nextMessage && !nextMessage.isUser))
-          const isFirstAssistentMessage = !q.isUser && (i === 0 || (!!previousMessage && !!previousMessage.isUser))
+            const isLastUserMessage = q.isUser && (i === messages.length - 1 || (!!nextMessage && !nextMessage.isUser))
+            const isFirstAssistentMessage = !q.isUser && (i === 0 || (!!previousMessage && !!previousMessage.isUser))
 
-          return (
-            <div
-              className={`message ${q.isUser ? '-user' : '-assistent'} ${isLastUserMessage || isFirstAssistentMessage ? '-avatar' : ''}`}
-              key={q.id}
-            >
-              {isFirstAssistentMessage && (
-                <>
-                  <p className="title">Ludilene</p>
-                  <ChatIcon isUser={false} />
-                </>
-              )}
-              <div className="text">
-                <ChatMessageByType {...q} />
+            return (
+              <div
+                className={`message ${q.isUser ? '-user' : '-assistent'} ${isLastUserMessage || isFirstAssistentMessage ? '-avatar' : ''}`}
+                key={i}
+              >
+                {isFirstAssistentMessage && (
+                  <>
+                    <p className="title">Ludilene</p>
+                    <ChatIcon isUser={false} />
+                  </>
+                )}
+                <div className="text">
+                  <ChatMessageByType {...q} />
+                </div>
+                {isLastUserMessage && <ChatIcon isUser={true} />}
               </div>
-              {isLastUserMessage && <ChatIcon isUser={true} />}
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
+        {loading && <div className="chat-loading">Ludilene está digitando...</div>}
       </div>
 
-      <Form className="form" onSubmit={handleSubmit}>
+      <Form className="chat-form" onSubmit={handleSubmit}>
         <FormControl ref={inputRef} placeholder="Digite aqui..." value={value} onChange={(e) => setValue(e.target.value)} />
         <Button className="button" type="submit">
           Enviar

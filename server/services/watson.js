@@ -5,7 +5,7 @@ class WatsonService {
   constructor() {
     this.workspaceId = 'fbdbc131-d113-42ac-b391-c25e9abfc403'
     this.ASSISTENT_INST = new AssistantV1({
-      version: '2019-04-15',
+      version: '2019-05-29',
       url: 'https://api.au-syd.assistant.watson.cloud.ibm.com/instances/b99ae937-3073-4c9d-b94d-17719d96d666',
       authenticator: new IamAuthenticator({
         apikey: 'YE4AnSiMZOV5j4oJcpjSaLQhX93sftXcutxC9bTJUFIx',

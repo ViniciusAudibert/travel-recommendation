@@ -5,11 +5,13 @@ import { Planejamentos } from '../src/components/Planejamentos'
 
 const PlanejamentoPage = () => {
   const [planejamentos, setPlanejamentos] = useState([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function fetchPlanejamentos(idUser) {
       const { data } = await axios.get('/api/planejamentos', { params: { customer_id: idUser } })
       setPlanejamentos(data.planejamentos)
+      setLoading(false)
     }
 
     const idUser = localStorage.getItem('USER_ID')
@@ -17,11 +19,11 @@ const PlanejamentoPage = () => {
     if (idUser != null) {
       fetchPlanejamentos(idUser)
     } else {
-      alert('Nenhum local encontrado para esse usuário')
+      setLoading(false)
     }
   }, [])
 
-  return <Planejamentos planejamentos={planejamentos} />
+  return <Planejamentos planejamentos={planejamentos} loading={loading} />
 }
 
 export default PlanejamentoPage

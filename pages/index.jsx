@@ -6,6 +6,7 @@ import { v4 } from 'uuid'
 
 const Index = () => {
   const [messages, setMessages] = useState([])
+  const [loading, setLoading] = useState(true)
 
   const idUser = useMemo(() => {
     if (typeof window !== 'undefined') {
@@ -25,6 +26,7 @@ const Index = () => {
       const { data } = await axios.get('/api/messages/welcome', { params: { customer_id: idUser } })
       const mappedMessages = data.messages.map((m) => MessageUtil.serverDataToChatMessage(m))
       setMessages(mappedMessages.flat())
+      setLoading(false)
     }
 
     welcomeFetch()
@@ -34,6 +36,7 @@ const Index = () => {
     async function askLudilene(message) {
       const resp = await axios.get('/api/messages/talk', { params: { message, customer_id: idUser } })
       setMessages((m) => m.concat(MessageUtil.serverDataToChatMessage(resp.data)))
+      setLoading(false)
     }
 
     const lastMessage = messages[messages.length - 1]
@@ -41,10 +44,11 @@ const Index = () => {
     if (lastMessage && lastMessage.isUser) {
       askLudilene(lastMessage.message)
     }
-  }, [messages, setMessages])
+  }, [messages, setMessages, setLoading])
 
   const onEnter = useCallback(
     (message) => {
+      setLoading(true)
       setMessages((m) => {
         m.push({
           id: 'user-message-' + m.length,
@@ -54,12 +58,12 @@ const Index = () => {
         return [...m]
       })
     },
-    [setMessages]
+    [setMessages, setLoading]
   )
 
   return (
     <div>
-      <Chat messages={messages} onEnter={onEnter} />
+      <Chat messages={messages} onEnter={onEnter} loading={loading} />
     </div>
   )
 }

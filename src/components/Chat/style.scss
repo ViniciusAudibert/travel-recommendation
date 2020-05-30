@@ -1,7 +1,8 @@
 $avatar-size: 60px;
 $padding: 20px;
 
-.chat {
+.chat-container {
+  position: relative;
   padding: $padding;
   max-width: 1080px;
   margin: 0 auto;
@@ -67,14 +68,14 @@ $padding: 20px;
       padding: 10px 15px;
     }
   }
+}
 
-  > .form {
-    display: flex;
-    margin: $padding 0 0;
+.chat-form {
+  display: flex;
+  margin: $padding 0 0;
 
-    > .button {
-      margin-left: 10px;
-    }
+  > .button {
+    margin-left: 10px;
   }
 }
 
@@ -175,4 +176,14 @@ $padding: 20px;
       margin-left: 10px;
     }
   }
+}
+
+.chat-loading {
+  position: absolute;
+  bottom: 20px;
+  color: black;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 8px 50px;
+  border-radius: 8px;
+  font-size: 12px;
 }

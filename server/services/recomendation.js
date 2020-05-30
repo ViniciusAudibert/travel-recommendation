@@ -218,4 +218,5 @@ class RecommendationService {
   }
 }
 
+module.exports.ESTADOS_RESPOSTA = ESTADOS_RESPOSTA
 module.exports.recommendationService = new RecommendationService()

@@ -27,8 +27,9 @@ class PlanejamentosService {
     return placesArr.reduce((curr, next) => {
       const index = curr.findIndex((i) => i.nomeCidade === next.nomeCidade)
 
-      if (index != null) {
+      if (index === -1) {
         curr.push({
+          _id: next._id,
           nomeCidade: next.nomeCidade,
           lugares: [next.lugar],
         })

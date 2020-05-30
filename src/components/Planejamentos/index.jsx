@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 
 import { Badge, ListGroup, ListGroupItem } from 'react-bootstrap'
 
-export const Planejamentos = ({ planejamentos }) => {
+export const Planejamentos = ({ planejamentos, loading }) => {
   const [collapseLugares, setCollapseLugares] = useState({})
 
   return (
@@ -48,6 +48,8 @@ export const Planejamentos = ({ planejamentos }) => {
                   </>
                 )
               })
+            ) : loading ? (
+              <p>Carregando...</p>
             ) : (
               <p>Nenhum lugar salvo</p>
             )}
