@@ -5,7 +5,8 @@
     "build": "next build",
     "dev": "nodemon server/index.js",
     "prod": "yarn build && yarn start",
-    "start": "cross-env NODE_ENV=production node server/index.js"
+    "start": "cross-env NODE_ENV=production node server/index.js",
+    "heroku-postbuild": "yarn build"
   },
   "engines": {
     "node": "12.x.x"
