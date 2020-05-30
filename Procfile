@@ -1,2 +1,1 @@
-web: next build
-web: node index.js
+web: npm run prod
