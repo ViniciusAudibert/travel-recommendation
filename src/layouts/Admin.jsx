@@ -1,10 +1,11 @@
 import 'react-responsive-carousel/lib/styles/carousel.min.css'
+import './admin.scss'
 
 import React, { Component } from 'react'
 import NotificationSystem from 'react-notification-system'
 
 import AdminNavbar from '../components/Navbars/AdminNavbar'
-import Footer from '../components/Footer/Footer'
+// import Footer from '../components/Footer/Footer'
 import Sidebar from '../components/Sidebar/Sidebar'
 
 import { style } from '../variables/Variables'
@@ -125,7 +126,7 @@ class Admin extends Component {
 
           {this.props.children}
 
-          <Footer />
+          {/* <Footer /> */}
         </div>
       </div>
     )

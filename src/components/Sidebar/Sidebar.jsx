@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import Link from 'next/link'
-import AdminNavbarLinks from '../Navbars/AdminNavbarLinks.jsx'
+// import Link from 'next/link'
+// import AdminNavbarLinks from '../Navbars/AdminNavbarLinks.jsx'
 
 const Sidebar = (props) => {
   const router = useRouter()
@@ -45,17 +45,16 @@ const Sidebar = (props) => {
       </div>
       <div className="sidebar-wrapper">
         <ul className="nav">
-          {width <= 991 ? <AdminNavbarLinks /> : null}
           {props.routes.map((prop, key) => {
             if (!prop.redirect)
               return (
                 <li className={prop.upgrade ? 'active active-pro' : activeRoute(prop.path)} key={key}>
-                  <Link href={prop.path}>
-                    <a className="nav-link">
-                      <i className={prop.icon} />
-                      <p>{prop.name}</p>
-                    </a>
-                  </Link>
+                  {/* <Link > */}
+                  <a href={prop.path} className="nav-link">
+                    <i className={prop.icon} />
+                    <p>{prop.name}</p>
+                  </a>
+                  {/* </Link> */}
                 </li>
               )
             return null

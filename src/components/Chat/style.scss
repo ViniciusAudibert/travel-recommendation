@@ -1,12 +1,19 @@
-$avatar-size: 60px;
+$avatar-size: 40px;
 $padding: 20px;
 
+.chat {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex: 1;
+}
+
 .chat-container {
+  overflow: hidden;
+  flex: 1;
   position: relative;
   padding: $padding;
   max-width: 1080px;
-  margin: 0 auto;
-  height: 80vh;
   display: flex;
   flex-direction: column;
 
@@ -24,7 +31,7 @@ $padding: 20px;
       display: inline-flex;
 
       flex-direction: column;
-      max-width: 45%;
+      max-width: 75%;
 
       > .title {
         color: #969696;
@@ -60,19 +67,23 @@ $padding: 20px;
           border-bottom-right-radius: 0;
         }
       }
+      &.-avatar {
+        margin-top: 30px;
+      }
     }
 
     .text {
       margin: 0;
       border-radius: 15px;
       padding: 10px 15px;
+      display: block;
     }
   }
 }
 
 .chat-form {
   display: flex;
-  margin: $padding 0 0;
+  margin: 0 $padding 10px;
 
   > .button {
     margin-left: 10px;
@@ -183,7 +194,7 @@ $padding: 20px;
   bottom: 20px;
   color: black;
   background: rgba(255, 255, 255, 0.8);
-  padding: 8px 50px;
+  padding: 10px 15px;
   border-radius: 8px;
   font-size: 12px;
 }

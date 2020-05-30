@@ -62,7 +62,7 @@ const Index = () => {
   )
 
   return (
-    <div>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <Chat messages={messages} onEnter={onEnter} loading={loading} />
     </div>
   )

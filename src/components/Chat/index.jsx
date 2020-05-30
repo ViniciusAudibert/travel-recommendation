@@ -21,8 +21,10 @@ export const Chat = (props) => {
   function handleSubmit(e) {
     e.preventDefault()
 
-    if (value && value.trim()) onEnter(value)
-    setValue('')
+    if (!loading && value && value.trim()) {
+      onEnter(value)
+      setValue('')
+    }
   }
 
   return (
@@ -60,7 +62,7 @@ export const Chat = (props) => {
 
       <Form className="chat-form" onSubmit={handleSubmit}>
         <FormControl ref={inputRef} placeholder="Digite aqui..." value={value} onChange={(e) => setValue(e.target.value)} />
-        <Button className="button" type="submit">
+        <Button className="button" type="submit" bsStyle="primary">
           Enviar
         </Button>
       </Form>

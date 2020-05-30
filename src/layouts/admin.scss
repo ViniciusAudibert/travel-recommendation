@@ -1,0 +1,13 @@
+#main-panel {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  .navbar-header .navbar-toggle {
+    margin: 0px 15px 0px 0;
+  }
+
+  .navbar {
+    min-height: unset;
+  }
+}
