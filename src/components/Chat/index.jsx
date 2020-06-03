@@ -15,7 +15,10 @@ export const Chat = (props) => {
   }, [])
 
   useEffect(() => {
+    document.body.scrollTo(0, document.body.scrollHeight)
     messagesRef.current.scrollTo(0, messagesRef.current.scrollHeight)
+
+    inputRef.current._reactInternalFiber.child.stateNode.focus()
   }, [messages.length])
 
   function handleSubmit(e) {
