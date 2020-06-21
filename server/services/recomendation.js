@@ -40,8 +40,12 @@ class RecommendationService {
   async _getPrimeiraRecomendacao(user) {
     let messages = []
     await mongoService.openConnection()
+    const cidadeNome = user.cidade
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
 
-    const cidadeDb = await mongoService.db.collection('cidade').findOne({ nome: user.cidade.toLowerCase() })
+    const cidadeDb = await mongoService.db.collection('cidade').findOne({ nome: cidadeNome })
 
     if (cidadeDb) {
       user.cidade = cidadeDb
