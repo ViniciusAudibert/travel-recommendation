@@ -1,6 +1,7 @@
 import React from 'react'
 import Head from 'next/head'
 import Admin from '../src/layouts/Admin'
+import { DYNATRACE_SNIPPET } from '../src/assets/js/dynatrace'
 
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import '../src/assets/css/animate.min.css'
@@ -11,13 +12,7 @@ import '../src/assets/css/pe-icon-7-stroke.scss'
 export default ({ Component, pageProps }) => (
   <>
     <Head>
-      <title>Tá no Ponto pra vc!</title>
-      <meta name="title" content="Tá no Ponto pra vc!" />
-      <meta name="description" content="Clica aqui para ver as ofertas mais pincríveis que selecionamos :>" />
-
-      <meta property="og:title" content="Tá no Ponto pra vc!" />
-      <meta property="og:image" content="https://m.pontofrio.com.br/assets/images/og-imagem.jpg" />
-
+      <script type="text/javascript" dangerouslySetInnerHTML={{ __html: DYNATRACE_SNIPPET }} />
       <script
         dangerouslySetInnerHTML={{
           __html: `
