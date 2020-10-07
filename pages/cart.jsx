@@ -4,7 +4,7 @@ import Link from 'next/link'
 import axios from 'axios'
 
 import { Planejamentos } from '../src/components/Planejamentos'
-import { DynatraceCheckout } from '../src/assets/js/dynacheckout'
+import { DynatraceCart } from '../src/assets/js/dyna-cart'
 
 const PlanejamentoPage = () => {
   const [planejamentos, setPlanejamentos] = useState([])
@@ -12,7 +12,7 @@ const PlanejamentoPage = () => {
 
   useEffect(() => {
     async function fetchPlanejamentos(idUser) {
-      const { data } = await axios.get('/api/planejamentos', { params: { customer_id: idUser } })
+      const { data } = await axios.get('/api/test', { params: { customer_id: idUser } })
       setPlanejamentos(data.planejamentos)
       setLoading(false)
     }
@@ -39,11 +39,11 @@ const PlanejamentoPage = () => {
   return (
     <>
       <Head>
-        <DynatraceCheckout />
+        <DynatraceCart />
       </Head>
-
-      <Planejamentos planejamentos={planejamentos} loading={loading} />
-      <Link href="/cart">
+      {planejamentos === 1 && <Planejamentos planejamentos={planejamentos} loading={loading} />}
+      Teste Cart
+      <Link href="/planejamento">
         <a>Cart</a>
       </Link>
       <button onClick={click1}>Clique aqui 1</button>
